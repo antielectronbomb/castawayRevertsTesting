@@ -97,6 +97,8 @@ enum struct Player {
 
 //item sets
 #define ItemSet_Saharan 1
+#define ItemSet_SpDelivery 1
+//#define ItemSet_CrocoStyle 1 //headshot immunity attribute doesn't work anymore
 
 enum struct Entity {
 	bool exists;
@@ -163,6 +165,7 @@ public void OnPluginStart() {
 	ItemDefine("Claidheamh Mòr", "claidheamh", "Reverted to pre-toughbreak, -15 health, no damage vulnerability");
 	ItemDefine("Cleaner's Carbine", "carbine", "Reverted to release, crits for 3 seconds on kill");
 	ItemDefine("Crit-a-Cola", "critcola", "Reverted to pre-matchmaking, +25% movespeed, +10% damage taken, no mark-for-death on attack");
+//	ItemDefine("Croc-o-Style Kit", "crocostyle", "Restored the item set bonus, survive headshots with 1 HP again");
 	ItemDefine("Dead Ringer", "ringer", "Reverted to pre-gunmettle, can pick up ammo, 80% dmg resist for 4s");
 	ItemDefine("Degreaser", "degreaser", "Reverted to pre-toughbreak, full switch speed for all weapons, old penalties");
 	ItemDefine("Dragon's Fury", "dragonfury", "Reverted -25% projectile size nerf");
@@ -190,6 +193,7 @@ public void OnPluginStart() {
 	ItemDefine("Shortstop", "shortstop", "Reverted reload time to release version, with +40% push force");
 	ItemDefine("Soda Popper", "sodapop", "Reverted to pre-2013, run to build hype and auto gain minicrits");
 	ItemDefine("Solemn Vow", "solemn", "Reverted to pre-gunmettle, firing speed penalty removed");
+	ItemDefine("Special Delivery", "spdelivery", "Restored the item set bonus, +25 max HP. Milkman hat is not required");
 	ItemDefine("Spy-cicle", "spycicle", "Reverted to pre-gunmettle, fire immunity for 2s, silent killer");
 	ItemDefine("Sticky Jumper", "stkjumper", "Can have 8 stickies out at once again, picks up intel again");
 	ItemDefine("Sydney Sleeper", "sleeper", "Reverted to pre-2018, restored jarate explosion, no headshots");
@@ -1442,7 +1446,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 	) {
 		item1 = TF2Items_CreateItem(0);
 		TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
-		TF2Items_SetNumAttributes(item1, 3);
+		TF2Items_SetNumAttributes(item1, 4);
 		TF2Items_SetAttribute(item1, 0, 241, 1.0); // reload time increased hidden
 		TF2Items_SetAttribute(item1, 1, 534, 1.4); // airblast vulnerability multiplier hidden
 		TF2Items_SetAttribute(item1, 2, 535, 1.4); // damage force increase hidden
@@ -1455,7 +1459,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 	) {
 		item1 = TF2Items_CreateItem(0);
 		TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
-		TF2Items_SetNumAttributes(item1, 2);
+		TF2Items_SetNumAttributes(item1, 3);
 		TF2Items_SetAttribute(item1, 0, 42, 0.0); // sniper no headshots
 		TF2Items_SetAttribute(item1, 1, 175, 0.0); // jarate duration
 	}
@@ -1750,6 +1754,8 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 		// keep track of resupply time
 		players[client].resupply_time = GetGameTime();
 
+
+		//Saharan Spy Set Bonus
 		if (
 			ItemIsEnabled("saharan")
 		) {
@@ -1815,13 +1821,167 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 						case ItemSet_Saharan:
 						{
 							TF2Attrib_SetByDefIndex(first_wep,159,0.5); //blink duration increase
-							TF2Attrib_SetByDefIndex(first_wep,160,1.0); //quet decloak
+							TF2Attrib_SetByDefIndex(first_wep,160,1.0); //quiet decloak
 						}
 					}
 				}
 			}
 
 		}
+
+
+		//Special Delivery Set Bonus
+		if (
+			ItemIsEnabled("spdelivery")
+		) {
+
+			//handle item sets
+			int first_wep = -1;
+			int wep_count = 0;
+			int active_set = 0;
+
+			int length = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
+			for (int i;i < length; i++)
+			{
+				weapon = GetEntPropEnt(client,Prop_Send,"m_hMyWeapons",i);
+				if (weapon != -1)
+				{
+					char classname[64];
+					GetEntityClassname(weapon, classname, sizeof(class));
+					int item_index = GetEntProp(weapon,Prop_Send,"m_iItemDefinitionIndex");
+
+					//stats appear to persist between loadout changes for whatever reason
+					//reset them each time here
+					if(
+						ItemIsEnabled("spdelivery") &&
+						(StrEqual(classname, "tf_weapon_handgun_scout_primary") &&
+						(item_index == 220)) ||
+						(StrEqual(classname, "tf_weapon_jar_milk") &&
+						(item_index == 222)) ||
+						(StrEqual(classname, "tf_weapon_bat_fish") &&
+						(item_index == 221))
+					) {
+						if (first_wep == -1) first_wep = weapon;
+						wep_count++;
+						if(wep_count == 3) active_set = ItemSet_SpDelivery;
+						//reset these values so loadout changes don't persist the attributes
+						TF2Attrib_SetByDefIndex(weapon,517,0.0); //reset the SET BONUS: max health additive bonus
+					}
+
+				}
+			}
+
+			if (active_set)
+			{
+				bool validSet = true;
+
+				// bool validSet = false;
+				// int num_wearables = TF2Util_GetPlayerWearableCount(client);
+				// for (int i = 0; i < num_wearables; i++)
+				// {
+				// 	int wearable = TF2Util_GetPlayerWearable(client, i);
+				// 	int item_index = GetEntProp(wearable,Prop_Send,"m_iItemDefinitionIndex");
+				// 	if(
+				// 		(active_set == ItemSet_SpDelivery) &&
+				// 		(item_index == 219)
+				// 	) {
+				// 		validSet = true;
+				// 		break;
+				// 	}
+				// }
+
+				if (validSet)
+				{
+					switch (active_set)
+					{
+						case ItemSet_SpDelivery:
+						{
+							TF2Attrib_SetByDefIndex(active_set,517,25.0); //SET BONUS: max health additive bonus
+						}
+					}
+				}
+			}
+
+		}
+
+/*
+//Headshot immunity bonus doesn't work anymore
+		//Croc-o-Style Kit Set Bonus
+		if (
+			ItemIsEnabled("crocostyle")
+		) {
+
+			//handle item sets
+			int first_wep = -1;
+			int wep_count = 0;
+			int active_set = 0;
+
+			int length = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
+			for (int i;i < length; i++)
+			{
+				weapon = GetEntPropEnt(client,Prop_Send,"m_hMyWeapons",i);
+				if (weapon != -1)
+				{
+					char classname[64];
+					GetEntityClassname(weapon, classname, sizeof(class));
+					int item_index = GetEntProp(weapon,Prop_Send,"m_iItemDefinitionIndex");
+
+					//stats appear to persist between loadout changes for whatever reason
+					//reset them each time here
+					if(
+						ItemIsEnabled("crocostyle") &&
+						(StrEqual(classname, "tf_weapon_sniperrifle") &&
+						(item_index == 230)) ||
+						(StrEqual(classname, "tf_wearable") &&
+						(item_index == 231)) ||
+						(StrEqual(classname, "tf_weapon_club") &&
+						(item_index == 232))
+					) {
+						if (first_wep == -1) first_wep = weapon;
+						wep_count++;
+						if(wep_count == 3) active_set = ItemSet_CrocoStyle;
+						//reset these values so loadout changes don't persist the attributes
+						TF2Attrib_SetByDefIndex(weapon,176,0.0); //reset the SET BONUS: no death from headshots
+					}
+
+				}
+			}
+
+			if (active_set)
+			{
+				bool validSet = true;
+		
+				
+			//	bool validSet = false;
+			//	int num_wearables = TF2Util_GetPlayerWearableCount(client);
+			//	for (int i = 0; i < num_wearables; i++)
+			//	{
+			//		int wearable = TF2Util_GetPlayerWearable(client, i);
+			//		int item_index = GetEntProp(wearable,Prop_Send,"m_iItemDefinitionIndex");
+			//		if(
+			//			(active_set == ItemSet_CrocoStyle) &&
+			//			(item_index == 229)
+			//		) {
+			//			validSet = true;
+			//			break;
+			//		}
+			//	}
+				
+
+				if (validSet)
+				{
+					switch (active_set)
+					{
+						case ItemSet_CrocoStyle:
+						{
+							TF2Attrib_SetByDefIndex(active_set,176,1.0); //SET BONUS: no death from headshots
+						}
+					}
+				}
+			}
+
+		}
+*/
 
 		{
 			//perform health fuckery
