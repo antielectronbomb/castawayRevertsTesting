@@ -1446,7 +1446,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 	) {
 		item1 = TF2Items_CreateItem(0);
 		TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
-		TF2Items_SetNumAttributes(item1, 4);
+		TF2Items_SetNumAttributes(item1, 3);
 		TF2Items_SetAttribute(item1, 0, 241, 1.0); // reload time increased hidden
 		TF2Items_SetAttribute(item1, 1, 534, 1.4); // airblast vulnerability multiplier hidden
 		TF2Items_SetAttribute(item1, 2, 535, 1.4); // damage force increase hidden
@@ -1459,7 +1459,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 	) {
 		item1 = TF2Items_CreateItem(0);
 		TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
-		TF2Items_SetNumAttributes(item1, 3);
+		TF2Items_SetNumAttributes(item1, 2);
 		TF2Items_SetAttribute(item1, 0, 42, 0.0); // sniper no headshots
 		TF2Items_SetAttribute(item1, 1, 175, 0.0); // jarate duration
 	}
