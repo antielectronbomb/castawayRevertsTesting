@@ -27,3 +27,8 @@ Special Delivery Set Bonus Restored
 	
  	Pre-July 10, 2013 Patch
         +25 max health on wearer.
+
+ Croc-o-Style Set Bonus Restored
+	
+ 	Pre-July 10, 2013 Patch
+	Survive headshots with 1 HP left
