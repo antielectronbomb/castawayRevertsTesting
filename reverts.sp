@@ -98,7 +98,7 @@ enum struct Player {
 //item sets
 #define ItemSet_Saharan 1
 #define ItemSet_SpDelivery 1
-//#define ItemSet_CrocoStyle 1 //headshot immunity attribute doesn't work anymore
+#define ItemSet_CrocoStyle 1
 
 enum struct Entity {
 	bool exists;
@@ -165,7 +165,7 @@ public void OnPluginStart() {
 	ItemDefine("Claidheamh Mòr", "claidheamh", "Reverted to pre-toughbreak, -15 health, no damage vulnerability");
 	ItemDefine("Cleaner's Carbine", "carbine", "Reverted to release, crits for 3 seconds on kill");
 	ItemDefine("Crit-a-Cola", "critcola", "Reverted to pre-matchmaking, +25% movespeed, +10% damage taken, no mark-for-death on attack");
-//	ItemDefine("Croc-o-Style Kit", "crocostyle", "Restored the item set bonus, survive headshots with 1 HP again");
+	ItemDefine("Croc-o-Style Kit", "crocostyle", "Restored item set bonus. Survive headshots with 1 HP again, Ol' Snaggletooth hat is not required");
 	ItemDefine("Dead Ringer", "ringer", "Reverted to pre-gunmettle, can pick up ammo, 80% dmg resist for 4s");
 	ItemDefine("Degreaser", "degreaser", "Reverted to pre-toughbreak, full switch speed for all weapons, old penalties");
 	ItemDefine("Dragon's Fury", "dragonfury", "Reverted -25% projectile size nerf");
@@ -1904,8 +1904,7 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 
 		}
 
-/*
-//Headshot immunity bonus doesn't work anymore
+
 		//Croc-o-Style Kit Set Bonus
 		if (
 			ItemIsEnabled("crocostyle")
@@ -1932,14 +1931,14 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 						ItemIsEnabled("crocostyle") &&
 						(StrEqual(classname, "tf_weapon_sniperrifle") &&
 						(item_index == 230)) ||
-						(StrEqual(classname, "tf_wearable") &&
-						(item_index == 231)) ||
+					//	(StrEqual(classname, "tf_wearable") &&
+					//	(item_index == 231)) ||
 						(StrEqual(classname, "tf_weapon_club") &&
 						(item_index == 232))
 					) {
 						if (first_wep == -1) first_wep = weapon;
 						wep_count++;
-						if(wep_count == 3) active_set = ItemSet_CrocoStyle;
+						if(wep_count == 2) active_set = ItemSet_CrocoStyle;
 						//reset these values so loadout changes don't persist the attributes
 						TF2Attrib_SetByDefIndex(weapon,176,0.0); //reset the SET BONUS: no death from headshots
 					}
@@ -1949,23 +1948,21 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 
 			if (active_set)
 			{
-				bool validSet = true;
-		
-				
-			//	bool validSet = false;
-			//	int num_wearables = TF2Util_GetPlayerWearableCount(client);
-			//	for (int i = 0; i < num_wearables; i++)
-			//	{
-			//		int wearable = TF2Util_GetPlayerWearable(client, i);
-			//		int item_index = GetEntProp(wearable,Prop_Send,"m_iItemDefinitionIndex");
-			//		if(
-			//			(active_set == ItemSet_CrocoStyle) &&
-			//			(item_index == 229)
-			//		) {
-			//			validSet = true;
-			//			break;
-			//		}
-			//	}
+				bool validSet = false;
+				int num_wearables = TF2Util_GetPlayerWearableCount(client);
+				for (int i = 0; i < num_wearables; i++)
+				{
+					int wearable = TF2Util_GetPlayerWearable(client, i);
+					int item_index = GetEntProp(wearable,Prop_Send,"m_iItemDefinitionIndex");
+					if(
+					//	This code only checks for Darwin's Danger Shield (231)
+						(active_set == ItemSet_CrocoStyle) &&
+						(item_index == 231)
+					) {
+						validSet = true;
+						break;
+					}
+				}
 				
 
 				if (validSet)
@@ -1981,7 +1978,7 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 			}
 
 		}
-*/
+
 
 		{
 			//perform health fuckery
