@@ -5,10 +5,11 @@ Original from https://github.com/rsedxcftvgyhbujnkiqwe/castaway-plugins
 Reverts I added:
 
 Enforcer is reverted to release version:
-	June 23, 2011 Patch (Über Update)
-	+20% damage done
-    0.5 sec increase in time taken to cloak
-	Random critical hits enabled.
+	
+ 	June 23, 2011 Patch (Über Update
+ 	+20% damage done
+  	0.5 sec increase in time taken to cloak
+ 	Random critical hits enabled.
 
 Rocket Jumper and Sticky Jumper can pick up the intelligence again.
 	May 31, 2012 Patch
