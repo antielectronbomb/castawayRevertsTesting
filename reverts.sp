@@ -1931,8 +1931,6 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 						ItemIsEnabled("crocostyle") &&
 						(StrEqual(classname, "tf_weapon_sniperrifle") &&
 						(item_index == 230)) ||
-					//	(StrEqual(classname, "tf_wearable") &&
-					//	(item_index == 231)) ||
 						(StrEqual(classname, "tf_weapon_club") &&
 						(item_index == 232))
 					) {
